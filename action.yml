@@ -62,6 +62,30 @@ runs:
         github_token: ${{ inputs.github-token }}
         claude_args: '--model ${{ inputs.model }}'
         use_sticky_comment: 'true'
+        settings: |
+          {
+            "permissions": {
+              "allow": [
+                "Bash(git diff:*)",
+                "Bash(git add:*)",
+                "Bash(git commit:*)",
+                "Bash(git push:*)",
+                "Bash(git log:*)",
+                "Bash(git status:*)",
+                "Bash(ls:*)",
+                "Bash(cat:*)",
+                "Bash(find:*)",
+                "Bash(mkdir:*)",
+                "Bash(echo:*)",
+                "Bash(shasum:*)",
+                "Read",
+                "Write",
+                "Edit",
+                "Glob",
+                "Grep"
+              ]
+            }
+          }
         prompt: |
           You have the Decodie skill installed. Use /decodie:analyze to analyze the files changed in this pull request.
 
