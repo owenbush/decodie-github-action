@@ -34,6 +34,14 @@ inputs:
     description: 'Comma-separated glob patterns for files to exclude'
     required: false
     default: ''
+  comment:
+    description: 'Whether to post a PR comment with the analysis summary'
+    required: false
+    default: 'true'
+  commit:
+    description: 'Whether to commit generated entries to .decodie/ in the PR branch'
+    required: false
+    default: 'true'
   github-token:
     description: 'GitHub token with repo and pull request permissions'
     required: false
@@ -95,6 +103,8 @@ runs:
           - Max files: ${{ inputs.max-files }}
           - Include patterns: ${{ inputs.include }}
           - Exclude patterns: ${{ inputs.exclude }}
+          - Post PR comment: ${{ inputs.comment }}
+          - Commit entries: ${{ inputs.commit }}
 
           Instructions:
           1. First, identify the files changed in this PR using git diff.
@@ -106,12 +116,12 @@ runs:
              - If max files is greater than 0, limit to that many files (prioritize the largest/most complex).
           3. Run /decodie:analyze on each file (or directory if there are many files in the same directory).
              - Use the ${{ inputs.mode }} mode (selective = 3-5 patterns per file, exhaustive = all patterns).
-          4. After analysis is complete, use `gh pr comment` to post a summary comment on this PR. Format the comment body as markdown with:
+          4. If "Post PR comment" is true, use `gh pr comment` to post a summary comment on this PR. Format the comment body as markdown with:
              - A header: "## 📖 Decodie Analysis"
              - Total number of entries generated across all files.
              - For each analyzed file, a collapsible <details> section containing the entries for that file.
              - Each entry should show: title, experience level, decision type, code snippet, explanation, and key concepts.
              - A footer linking to https://decodie.owenbush.dev
              Use: gh pr comment ${{ github.event.pull_request.number }} --body "YOUR_MARKDOWN_HERE"
-
-          5. The entries have already been written to .decodie/ by the skill. Commit and push the .decodie/ changes to this PR branch with the message "docs(decodie): auto-generated entries from PR analysis".
+          5. If "Commit entries" is true, the entries have already been written to .decodie/ by the skill. Commit and push the .decodie/ changes to this PR branch with the message "docs(decodie): auto-generated entries from PR analysis".
+             If "Commit entries" is false, do NOT commit or push any changes.
