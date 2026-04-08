@@ -52,6 +52,8 @@ Because it uses the real Decodie skill, entries are identical in format and qual
 | `max-files` | Maximum number of changed files to analyze (0 for no limit) | `10` |
 | `include` | Comma-separated glob patterns for files to include | `""` |
 | `exclude` | Comma-separated glob patterns for files to exclude | `""` |
+| `comment` | Whether to post a PR comment with the analysis summary | `true` |
+| `commit` | Whether to commit generated entries to `.decodie/` in the PR branch | `true` |
 | `github-token` | GitHub token with repo and pull request permissions | `${{ github.token }}` |
 
 ### Authentication
@@ -84,6 +86,24 @@ Store whichever you use as a GitHub repository secret.
     include: "src/**/*.ts,lib/**/*.ts"
     exclude: "**/*.test.ts,**/*.spec.ts"
     max-files: 5
+```
+
+### Comment Only (no commit)
+
+```yaml
+- uses: owenbush/decodie-github-action@v1
+  with:
+    anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+    commit: 'false'
+```
+
+### Commit Only (no comment)
+
+```yaml
+- uses: owenbush/decodie-github-action@v1
+  with:
+    anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+    comment: 'false'
 ```
 
 ### Exhaustive Mode
