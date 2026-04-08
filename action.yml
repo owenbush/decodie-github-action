@@ -1,4 +1,4 @@
-name: 'Decodie'
+name: 'Decodie Analyze'
 description: 'Automatically analyze changed files in PRs and generate Decodie learning entries'
 author: 'owenbush'
 branding:
