@@ -33,11 +33,12 @@ jobs:
 
 ## What It Does
 
-1. **Installs the Decodie skill** — the same `/decodie:analyze` command used in Claude Code
+1. **Installs the Decodie skill** — the same `/decodie:analyze` and `/decodie:flag-stale` commands used in Claude Code
 2. **Runs Claude Code** via [claude-code-action](https://github.com/anthropics/claude-code-action) to analyze changed files
 3. **Generates structured entries** — patterns, decisions, rationale, code snippets, key concepts
-4. **Commits entries to `.decodie/`** in the PR branch for use with the VSCode extension and web UI
-5. **Posts a PR comment** summarizing the analysis with collapsible sections per file
+4. **Flags stale entries** — existing entries whose referenced files were touched in the PR get marked `stale: true` so the VSCode extension and web UI can surface them
+5. **Commits entries to `.decodie/`** in the PR branch for use with the VSCode extension and web UI
+6. **Posts a PR comment** summarizing the analysis (and any newly-stale entries) with collapsible sections per file
 
 Because it uses the real Decodie skill, entries are identical in format and quality to what you get from `/decodie:analyze` in Claude Code or "Analyze File" in the VSCode extension.
 
@@ -54,6 +55,7 @@ Because it uses the real Decodie skill, entries are identical in format and qual
 | `exclude` | Comma-separated glob patterns for files to exclude | `""` |
 | `comment` | Whether to post a PR comment with the analysis summary | `true` |
 | `commit` | Whether to commit generated entries to `.decodie/` in the PR branch | `true` |
+| `flag-stale` | Whether to run `/decodie:flag-stale` to mark existing entries as stale when their referenced files change in this PR | `true` |
 | `github-token` | GitHub token with repo and pull request permissions | `${{ github.token }}` |
 
 ### Authentication
@@ -114,6 +116,17 @@ Store whichever you use as a GitHub repository secret.
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
     mode: exhaustive
     max-files: 3
+```
+
+### Disable stale-flagging
+
+`flag-stale` is enabled by default. To skip it (for example, on repos that don't yet have a baseline of verified entries):
+
+```yaml
+- uses: owenbush/decodie-github-action@v1
+  with:
+    anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+    flag-stale: 'false'
 ```
 
 ## Configuration
