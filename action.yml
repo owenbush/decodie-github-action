@@ -42,6 +42,10 @@ inputs:
     description: 'Whether to commit generated entries to .decodie/ in the PR branch'
     required: false
     default: 'true'
+  flag-stale:
+    description: 'Whether to run /decodie:flag-stale to mark existing entries as stale when their referenced files change in this PR'
+    required: false
+    default: 'true'
   github-token:
     description: 'GitHub token with repo and pull request permissions'
     required: false
@@ -96,7 +100,7 @@ runs:
             }
           }
         prompt: |
-          You have the Decodie skill installed. Use /decodie:analyze to analyze the files changed in this pull request.
+          You have the Decodie skill installed. Use /decodie:analyze to analyze the files changed in this pull request, then optionally use /decodie:flag-stale to mark existing entries whose referenced files have changed.
 
           Configuration:
           - Mode: ${{ inputs.mode }}
@@ -105,6 +109,7 @@ runs:
           - Exclude patterns: ${{ inputs.exclude }}
           - Post PR comment: ${{ inputs.comment }}
           - Commit entries: ${{ inputs.commit }}
+          - Flag stale: ${{ inputs.flag-stale }}
 
           Instructions:
           1. First, identify the files changed in this PR using git diff.
@@ -116,12 +121,15 @@ runs:
              - If max files is greater than 0, limit to that many files (prioritize the largest/most complex).
           3. Run /decodie:analyze on each file (or directory if there are many files in the same directory).
              - Use the ${{ inputs.mode }} mode (selective = 3-5 patterns per file, exhaustive = all patterns).
-          4. If "Post PR comment" is true, use `gh pr comment` to post a summary comment on this PR. Format the comment body as markdown with:
+          4. If "Flag stale" is true and a .decodie/index.json exists, run /decodie:flag-stale to detect existing entries whose referenced files have changed in this PR. The command compares each entry's verified_sha against HEAD via `git diff --name-only` and flips stale: true on entries whose source files appear in the diff. Capture the list of newly-stale entry IDs and the offending files for inclusion in the PR comment.
+             If "Flag stale" is false, skip this step.
+          5. If "Post PR comment" is true, use `gh pr comment` to post a summary comment on this PR. Format the comment body as markdown with:
              - A header: "## 📖 Decodie Analysis"
-             - Total number of entries generated across all files.
+             - Total number of new entries generated across all files (if any).
              - For each analyzed file, a collapsible <details> section containing the entries for that file.
              - Each entry should show: title, experience level, decision type, code snippet, explanation, and key concepts.
+             - If "Flag stale" was run AND any entries went newly stale, include a "### ⚠ Stale entries" section listing each stale entry's title, ID, and the source files in this PR that triggered staleness. Add a one-line note: "Run `/decodie:verify` locally to re-check anchors and clear the flag."
              - A footer linking to https://decodie.owenbush.dev
              Use: gh pr comment ${{ github.event.pull_request.number }} --body "YOUR_MARKDOWN_HERE"
-          5. If "Commit entries" is true, the entries have already been written to .decodie/ by the skill. Commit and push the .decodie/ changes to this PR branch with the message "docs(decodie): auto-generated entries from PR analysis".
+          6. If "Commit entries" is true, the entries have already been written to .decodie/ by the skill. Commit and push the .decodie/ changes (which include both new entries from analyze AND any stale-flag updates from flag-stale) to this PR branch with the message "docs(decodie): auto-generated entries from PR analysis".
              If "Commit entries" is false, do NOT commit or push any changes.
